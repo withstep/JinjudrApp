@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "218398169612",
+    "firebase_url": "https://jinjudr-18332.firebaseio.com",
+    "project_id": "jinjudr-18332",
+    "storage_bucket": "jinjudr-18332.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218398169612:android:13cdb0bf0fb15bfb",
+        "android_client_info": {
+          "package_name": "kr.co.withstep.jinjudr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "218398169612-kmr2fi35n8tqdma05efrpd1894ddn2rk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kr.co.withstep.jinjudr",
+            "certificate_hash": "f7b1556fc090fb7887ac21adb6736216a589d43e"
+          }
+        },
+        {
+          "client_id": "218398169612-u9o96arp3k7abio8n0plue2esde7b193.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCsJACxdk5aa8943dFZ1nHir20tq0WKSU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "218398169612-u9o96arp3k7abio8n0plue2esde7b193.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

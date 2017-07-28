@@ -1,0 +1,16 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- 스플래시 스크린 액티비티용 테마 -->
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:background">@drawable/splash</item>
+    </style>
+
+</resources>
