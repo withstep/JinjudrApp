@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 26
+    buildToolsVersion '25.0.3'
     defaultConfig {
         applicationId "kr.co.withstep.jinjudr"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -28,10 +28,11 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.+'
-    compile 'com.android.support:support-vector-drawable:23.+'
+    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:design:25.+'
+    compile 'com.android.support:support-vector-drawable:25.+'
     testCompile 'junit:junit:4.12'
-    compile "com.google.firebase:firebase-messaging:9.4.0"
+    compile 'com.google.firebase:firebase-messaging:9.4.0'
     //서버로 데이터를 보낼때 okhttp를 사용한다면 추가
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
 }

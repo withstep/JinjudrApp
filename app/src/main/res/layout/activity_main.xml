@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
+    android:keepScreenOn="true"
     android:orientation="vertical"
     app:layout_collapseParallaxMultiplier="1.0"
     tools:context="kr.co.withstep.jinjudr.MainActivity">
@@ -19,7 +20,9 @@
         <WebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+        </WebView>
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -29,6 +32,8 @@
             android:layout_gravity="center"
             android:indeterminate="false"
             android:visibility="gone" />
+
+
     </FrameLayout>
 
 </LinearLayout>
