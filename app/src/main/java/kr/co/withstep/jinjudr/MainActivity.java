@@ -70,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
             webView = (WebView) findViewById(R.id.webView);
             webView.setWebViewClient(new HelloWebViewClient());
             webView.getSettings().setJavaScriptEnabled(true);
+            webView.getSettings().setUseWideViewPort(true);
+            webView.getSettings().setDomStorageEnabled(true);
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
             // Enable pinch to zoom without the zoom buttons
             webView.getSettings().setBuiltInZoomControls(true);
