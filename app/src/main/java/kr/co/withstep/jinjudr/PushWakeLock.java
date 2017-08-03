@@ -21,9 +21,9 @@ public class PushWakeLock {
         }
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         sCpuWakeLock = pm.newWakeLock(
-                        PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                        PowerManager.PARTIAL_WAKE_LOCK |
                         PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                        PowerManager.ON_AFTER_RELEASE, "Hello");
+                        PowerManager.ON_AFTER_RELEASE, "WakeUp");
 
         sCpuWakeLock.acquire();
     }

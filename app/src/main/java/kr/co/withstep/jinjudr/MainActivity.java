@@ -20,13 +20,14 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
     private WebView webView;
     private ProgressBar progress;
@@ -138,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+
+        this.buttonControl();
     }
 
     //링크된 페이지가 우리의 웹뷰안에서 로드되게 하기
@@ -201,4 +205,42 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+    protected void buttonControl() {
+        // Buttons
+        Button back = (Button) this.findViewById(R.id.back);
+        Button forward = (Button) this.findViewById(R.id.forward);
+        Button refresh = (Button) this.findViewById(R.id.refresh);
+        Button home = (Button) this.findViewById(R.id.home);
+
+        back.setOnClickListener(this);
+        forward.setOnClickListener(this);
+        refresh.setOnClickListener(this);
+        home.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View arg0) {
+        switch (arg0.getId()) {
+            case R.id.back :
+                if(!EXITBack) {
+                    if (webView.canGoBack()) {
+                        webView.goBack();
+                    } else {
+                        Toast.makeText(MainActivity.this, "마지막 페이지 입니다.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            case R.id.forward :
+                if (webView.canGoForward()) {
+                    webView.goForward();
+                }
+                break;
+            case R.id.refresh :
+                webView.reload();
+                break;
+            case R.id.home :
+                webView.loadUrl(this.myUrl);
+                break;
+        }
+    }
 }

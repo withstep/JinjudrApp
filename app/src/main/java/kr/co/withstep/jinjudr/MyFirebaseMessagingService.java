@@ -27,12 +27,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         Log.d(TAG, "FCM Notification Message DATA : " + remoteMessage.getData().get("message"));
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        sCpuWakeLock = pm.newWakeLock(
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
-                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                        PowerManager.ON_AFTER_RELEASE, "Hello");
-        sCpuWakeLock.acquire(3000);
+
         sendNotification(remoteMessage.getData().get("message"));
     }
 
@@ -56,7 +51,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        PushWakeLock.acquireCpuWakeLock(this);
+
         notificationManager.notify(0, notificationBuilder.build());
+
+        PushWakeLock.releaseCpuLock();
     }
 
 }
