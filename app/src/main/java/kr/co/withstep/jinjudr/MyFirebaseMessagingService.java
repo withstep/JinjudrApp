@@ -1,5 +1,6 @@
 package kr.co.withstep.jinjudr;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -25,15 +26,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        String title = remoteMessage.getNotification().getTitle();
+        String message = remoteMessage.getNotification().getBody();
+        String url = remoteMessage.getData().get("url");
 
-        Log.d(TAG, "FCM Notification Message DATA : " + remoteMessage.getData().get("message"));
+        Log.d(TAG, "FCM Notification Message DATA : " + message);
 
-        sendNotification(remoteMessage.getData().get("message"));
-    }
 
-    private void sendNotification(String messageBody) {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        sCpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "WakeUp");
+
+        sCpuWakeLock.acquire();
+
+        Log.d(TAG, "FCM Notification Target URL : " + url);
+
+        if (title == "") {
+            title = getString(R.string.app_name);
+        }
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (url != "") {
+            intent.putExtra("url", url);
+        }
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
@@ -41,21 +56,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher))
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(messageBody)
+                .setContentTitle(title)
+                .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-//                .setVibrate(new long[]{0,3000})
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
                 .setContentIntent(pendingIntent);
+
+        NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle(notificationBuilder);
+        style.bigText(message).setBigContentTitle(title);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        PushWakeLock.acquireCpuWakeLock(this);
-
         notificationManager.notify(0, notificationBuilder.build());
 
-        PushWakeLock.releaseCpuLock();
-    }
+        sCpuWakeLock.release();
 
+    }
 }

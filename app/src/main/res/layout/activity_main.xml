@@ -41,33 +41,40 @@
         android:background="@color/colorBottom"
         android:gravity="bottom">
 
-        <Button
+        <ImageButton
             android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Back" />
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
 
-        <Button
+        <ImageButton
             android:id="@+id/forward"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Forward" />
+            app:srcCompat="@drawable/ic_arrow_forward_black_24dp" />
 
-        <Button
+        <ImageButton
             android:id="@+id/refresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Refresh" />
+            app:srcCompat="@drawable/ic_refresh_black_24dp" />
 
-        <Button
+        <ImageButton
             android:id="@+id/home"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Home" />
+            app:srcCompat="@drawable/ic_home_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/ic_settings_black_24dp" />
     </LinearLayout>
 
 </LinearLayout>

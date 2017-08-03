@@ -1,26 +1,34 @@
 package kr.co.withstep.jinjudr;
 
+import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -32,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private WebView webView;
     private ProgressBar progress;
     public static Handler MyHandler;
-    final String myUrl = "http://www.jinjudr.or.kr/";
+    public String myUrl = "http://www.jinjudr.or.kr/";
 
     private ValueCallback<Uri> filePathCallbackNormal;
     private ValueCallback<Uri[]> filePathCallbackLollipop;
@@ -45,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         //Notification
-        // FirebaseMessaging.getInstance().subscribeToTopic("notice");
-        // FirebaseInstanceId.getInstance().getToken();
+        FirebaseMessaging.getInstance().subscribeToTopic("debug");
+//        String token = FirebaseInstanceId.getInstance().getToken();
 
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -70,10 +78,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             webView = (WebView) findViewById(R.id.webView);
             webView.setWebViewClient(new HelloWebViewClient());
+            webView.getSettings().setDefaultTextEncodingName("UTF-8");
             webView.getSettings().setJavaScriptEnabled(true);
             webView.getSettings().setUseWideViewPort(true);
             webView.getSettings().setDomStorageEnabled(true);
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
 
             // Enable pinch to zoom without the zoom buttons
             webView.getSettings().setBuiltInZoomControls(true);
@@ -97,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     filePathCallbackNormal = uploadMsg;
                     Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                     i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setType("image/*");
+                    i.setType("*/*");
                     // i.setType("video/*");
                     startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_NORMAL_REQ_CODE);
                 }
@@ -119,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     filePathCallbackLollipop = filePathCallback;
                     Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                     i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setType("image/*");
+                    i.setType("*/*");
                     // i.setType("video/*");
                     startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_LOLLIPOP_REQ_CODE);
 
@@ -127,16 +137,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
 
+            webView.setDownloadListener(new DownloadListener() {
+
+                @Override
+                public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
+
+                    try {
+                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                        request.setMimeType(mimeType);
+                        request.addRequestHeader("User-Agent", userAgent);
+                        request.addRequestHeader("cookie", CookieManager.getInstance().getCookie(url));
+                        request.setDescription("DownloadFile");
+                        String fileName = URLUtil.guessFileName(url,contentDisposition,mimeType);
+                        fileName = fileName.replaceAll("\"", "");
+                        request.setTitle(fileName);
+                        request.allowScanningByMediaScanner();
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                        dm.enqueue(request);
+                         Toast.makeText(getApplicationContext(), "다운로드 시작중..", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+
+                        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            // Should we show an explanation?
+                            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                                 Toast.makeText(getBaseContext(), "첨부파일 다운로드를 위해\n동의가 필요합니다.", Toast.LENGTH_LONG).show();
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        110);
+                            } else {
+                                 Toast.makeText(getBaseContext(), "첨부파일 다운로드를 위해\n동의가 필요합니다.", Toast.LENGTH_LONG).show();
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        110);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // FCM 에서 넘어온 URL 주소로 변경
+            if (getIntent().getExtras() != null) {
+                String url = getIntent().getExtras().getString("url");
+                myUrl =  url;
+            }
+
             webView.loadUrl(myUrl);
         }
 
         MyHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if(msg.what == 0)
-                {
-                    EXITBack = false;
-                }
+            if(msg.what == 0)
+            {
+                EXITBack = false;
+            }
             }
         };
 
@@ -207,10 +264,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void buttonControl() {
         // Buttons
-        Button back = (Button) this.findViewById(R.id.back);
-        Button forward = (Button) this.findViewById(R.id.forward);
-        Button refresh = (Button) this.findViewById(R.id.refresh);
-        Button home = (Button) this.findViewById(R.id.home);
+        ImageButton back = (ImageButton) this.findViewById(R.id.back);
+        ImageButton forward = (ImageButton) this.findViewById(R.id.forward);
+        ImageButton refresh = (ImageButton) this.findViewById(R.id.refresh);
+        ImageButton home = (ImageButton) this.findViewById(R.id.home);
 
         back.setOnClickListener(this);
         forward.setOnClickListener(this);
@@ -243,4 +300,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
+
 }
