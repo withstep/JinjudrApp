@@ -76,5 +76,5 @@
             android:layout_weight="1"
             app:srcCompat="@drawable/ic_settings_black_24dp" />
     </LinearLayout>
-
+    
 </LinearLayout>
