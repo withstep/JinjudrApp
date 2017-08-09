@@ -1,6 +1,5 @@
 package kr.co.withstep.jinjudr;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
@@ -17,11 +16,10 @@ import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
@@ -35,12 +33,16 @@ import android.widget.Toast;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
+
     private WebView webView;
     private ProgressBar progress;
     public static Handler MyHandler;
-    public String myUrl = "http://www.jinjudr.or.kr/";
+    public String myUrl;
 
     private ValueCallback<Uri> filePathCallbackNormal;
     private ValueCallback<Uri[]> filePathCallbackLollipop;
@@ -48,13 +50,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final static int FILECHOOSER_LOLLIPOP_REQ_CODE = 2;
 
     @Override
+    public void onStart() {
+        super.onStart();
+        CookieManager cookieManager = CookieManager.getInstance();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            CookieSyncManager.createInstance(this);
+        }
+        cookieManager.setAcceptCookie(true);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.createInstance(this);
+        }
+
         //Notification
-        FirebaseMessaging.getInstance().subscribeToTopic("debug");
-//        String token = FirebaseInstanceId.getInstance().getToken();
+        FirebaseMessaging.getInstance().subscribeToTopic("topic");
+        String token = FirebaseInstanceId.getInstance().getToken();
+        String tokenAes = Security.encrypt("Android||" + token, getString(R.string.app_secret_key));
+//        Log.d(TAG, "Token AES : " + tokenAes);
+        try {
+            myUrl = getString(R.string.app_site) + "app/index.php?token=" + URLEncoder.encode(tokenAes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -83,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             webView.getSettings().setUseWideViewPort(true);
             webView.getSettings().setDomStorageEnabled(true);
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
 
             // Enable pinch to zoom without the zoom buttons
             webView.getSettings().setBuiltInZoomControls(true);
@@ -200,10 +223,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         this.buttonControl();
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.getInstance().stopSync();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.getInstance().startSync();
+        }
+    }
 
     //링크된 페이지가 우리의 웹뷰안에서 로드되게 하기
     //웹뷰 클라이언트 재정의(WebViewClient)
-    private class HelloWebViewClient extends WebViewClient{
+    private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url){
             view.loadUrl(url);
@@ -216,7 +258,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //페이지 로딩 종료시 호출
         public void onPageFinished(WebView view,String Url){
+
             progress.setVisibility(View.GONE);
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                //noinspection deprecation
+                CookieSyncManager.getInstance().sync();
+            } else {
+                // 롤리팝 이상에서는 CookieManager의 flush를 하도록 변경됨.
+                CookieManager.getInstance().flush();
+            }
         }
     }
 
@@ -230,7 +281,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 filePathCallbackNormal = null;
             } else if (requestCode == FILECHOOSER_LOLLIPOP_REQ_CODE) {
                 if (filePathCallbackLollipop == null) return ;
-                filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                }
                 filePathCallbackLollipop = null;
             }
         } else {
@@ -296,10 +349,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 webView.reload();
                 break;
             case R.id.home :
-                webView.loadUrl(this.myUrl);
+                webView.loadUrl(myUrl);
                 break;
         }
     }
-
-
 }
