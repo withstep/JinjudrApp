@@ -2,5 +2,5 @@
     <string name="app_site">http://www.jinjudr.or.kr/</string>
     <string name="app_name">진주시의사회</string>
     <string name="action_settings">설정</string>
-    <string name="app_secret_key">5678901234567890</string>
+    <string name="app_secret_key">abcdef1234567890</string>
 </resources>

@@ -16,6 +16,7 @@ import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -70,12 +71,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         //Notification
-        FirebaseMessaging.getInstance().subscribeToTopic("topic");
+        FirebaseMessaging.getInstance().subscribeToTopic("jinjudr");
         String token = FirebaseInstanceId.getInstance().getToken();
         String tokenAes = Security.encrypt("Android||" + token, getString(R.string.app_secret_key));
 //        Log.d(TAG, "Token AES : " + tokenAes);
         try {
-            myUrl = getString(R.string.app_site) + "app/index.php?token=" + URLEncoder.encode(tokenAes, "UTF-8");
+            this.myUrl = getString(R.string.app_site) + "app/index.php?token=" + URLEncoder.encode(tokenAes, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -202,12 +203,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
 
             // FCM 에서 넘어온 URL 주소로 변경
+            String url = myUrl;
             if (getIntent().getExtras() != null) {
-                String url = getIntent().getExtras().getString("url");
-                myUrl =  url;
+                url = getIntent().getExtras().getString("url");
             }
 
-            webView.loadUrl(myUrl);
+            webView.loadUrl(url);
         }
 
         MyHandler = new Handler() {
@@ -246,11 +247,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //링크된 페이지가 우리의 웹뷰안에서 로드되게 하기
     //웹뷰 클라이언트 재정의(WebViewClient)
     private class HelloWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url){
-            view.loadUrl(url);
-            return true;
-        }
         // 페이지 로딩 시작시 호출
         @Override
         public void onPageStarted(WebView view,String url , Bitmap favicon){
