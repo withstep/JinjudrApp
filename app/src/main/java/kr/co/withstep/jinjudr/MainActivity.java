@@ -34,9 +34,6 @@ import android.widget.Toast;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
 
@@ -70,17 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             CookieSyncManager.createInstance(this);
         }
 
-        //Notification
-        FirebaseMessaging.getInstance().subscribeToTopic("jinjudr");
-        String token = FirebaseInstanceId.getInstance().getToken();
-        String tokenAes = Security.encrypt("Android||" + token, getString(R.string.app_secret_key));
-//        Log.d(TAG, "Token AES : " + tokenAes);
-        try {
-            this.myUrl = getString(R.string.app_site) + "app/index.php?token=" + URLEncoder.encode(tokenAes, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -91,18 +77,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         boolean isMobileConn = ni.isConnected();
 
-
         if (!isWifiConn && !isMobileConn) {
             Toast.makeText(this, "인터넷에 접속되어 있지 않습니다!", Toast.LENGTH_SHORT)
                     .show();
             finish();//액티비티 종료
         } else {
+
             setContentView(R.layout.activity_main);
+
+            //Notification
+            FirebaseMessaging.getInstance().subscribeToTopic("jinjudr");
+            // Token Inserts
+            myUrl = getString(R.string.app_site) + "app/index.php";
+
+            String token = FirebaseInstanceId.getInstance().getToken();
+//            Log.d(TAG, "Token : " + token);
+            if (token != null) {
+                String tokenAes = Security.encrypt("Android||" + token, getString(R.string.app_secret_key));
+                myUrl = myUrl + "?token=" + tokenAes;
+                Log.d(TAG, "Token URL : " + myUrl);
+            }
+
 
             progress = (ProgressBar) findViewById(R.id.progressBar);
 
             webView = (WebView) findViewById(R.id.webView);
-            webView.setWebViewClient(new HelloWebViewClient());
+            webView.setWebViewClient(new MyWebViewClient());
             webView.getSettings().setDefaultTextEncodingName("UTF-8");
             webView.getSettings().setJavaScriptEnabled(true);
             webView.getSettings().setUseWideViewPort(true);
@@ -246,11 +246,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //링크된 페이지가 우리의 웹뷰안에서 로드되게 하기
     //웹뷰 클라이언트 재정의(WebViewClient)
-    private class HelloWebViewClient extends WebViewClient {
-        // 페이지 로딩 시작시 호출
+    private class MyWebViewClient extends WebViewClient {
         @Override
         public void onPageStarted(WebView view,String url , Bitmap favicon){
             progress.setVisibility(View.VISIBLE);
+            String token = FirebaseInstanceId.getInstance().getToken();
+            Log.d(TAG, "Token : " + token);
         }
         //페이지 로딩 종료시 호출
         public void onPageFinished(WebView view,String Url){

@@ -30,7 +30,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String message = remoteMessage.getNotification().getBody();
         String url = remoteMessage.getData().get("url");
 
-        Log.d(TAG, "FCM Notification Message DATA : " + message);
+//        Log.d(TAG, "FCM Notification Message DATA : " + message);
 
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -38,7 +38,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         sCpuWakeLock.acquire();
 
-        Log.d(TAG, "FCM Notification Target URL : " + url);
+//        Log.d(TAG, "FCM Notification Target URL : " + url);
 
         if (title == "") {
             title = getString(R.string.app_name);
@@ -72,6 +72,5 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notificationManager.notify(0, notificationBuilder.build());
 
         sCpuWakeLock.release();
-
     }
 }
